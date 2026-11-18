@@ -1,0 +1,22 @@
+# Example: scan YOUR OWN staging site after every deploy; fail the build on High findings.
+# Copy to .github/workflows/security-scan.yml in your repository.
+name: security-scan
+on:
+  workflow_dispatch:
+  schedule: [{ cron: "0 3 * * 1" }]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: YOUR_ORG/vulnscanner }   # or vendor the scanner into your repo
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: >
+          python -m app.cli https://staging.example.com --consent
+          --scope example.com --profile gentle
+          --format html --out report.html --fail-on high
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: security-report, path: report.html }

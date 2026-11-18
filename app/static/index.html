@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VulnScanner 3.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html.light { filter: invert(1) hue-rotate(180deg); background: #fff; }
+    html.light .keep { filter: invert(1) hue-rotate(180deg); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen">
+  <div class="bg-amber-500/10 border-b border-amber-500/40 text-amber-300 text-sm px-4 py-3 text-center" data-i18n="banner"></div>
+
+  <main class="max-w-5xl mx-auto p-6 space-y-6">
+    <header class="flex items-center justify-between flex-wrap gap-3">
+      <h1 class="text-3xl font-bold">🛡️ VulnScanner <span class="text-xs text-slate-500 font-normal">v3.0</span></h1>
+      <div class="flex gap-2 text-sm flex-wrap">
+        <button id="tabScan" class="tab px-3 py-1 rounded bg-sky-600" data-i18n="tabScan"></button>
+        <button id="tabHistory" class="tab px-3 py-1 rounded bg-slate-800" data-i18n="tabHistory"></button>
+        <button id="tabInv" class="tab px-3 py-1 rounded bg-slate-800" data-i18n="tabInv"></button>
+        <button id="tabSched" class="tab px-3 py-1 rounded bg-slate-800" data-i18n="tabSched"></button>
+        <button id="langBtn" class="px-3 py-1 rounded bg-slate-800">EN</button>
+        <button id="themeBtn" class="px-3 py-1 rounded bg-slate-800">☀/🌙</button>
+      </div>
+    </header>
+
+    <!-- ===== Scan tab ===== -->
+    <div id="viewScan" class="space-y-6">
+      <section class="bg-slate-900 rounded-xl border border-slate-800">
+        <details open>
+          <summary class="cursor-pointer px-5 py-3 font-semibold text-amber-300" data-i18n="risksTitle"></summary>
+          <div id="risks" class="px-5 pb-4 space-y-3 text-sm"></div>
+        </details>
+      </section>
+
+      <section class="bg-slate-900 rounded-xl p-5 space-y-3 border border-slate-800">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="text-sm font-semibold text-sky-400" data-i18n="presetsTitle"></span>
+            <button id="autoTuneBtn" type="button" class="text-xs bg-emerald-700 hover:bg-emerald-600 px-3 py-1 rounded" data-i18n="autoTuneBtn"></button>
+          </div>
+          <div id="presetCards" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs"></div>
+          <p id="autoTuneInfo" class="text-xs text-emerald-400"></p>
+        </div>
+
+        <label class="block text-sm text-slate-400" data-i18n="targetsLabel"></label>
+        <textarea id="targets" rows="3" placeholder="example.com&#10;https://staging.example.com/page?id=1"
+                  class="w-full bg-slate-800 rounded px-3 py-2 outline-none focus:ring-2 ring-sky-500 text-sm"></textarea>
+
+        <div class="grid sm:grid-cols-3 gap-3 text-sm">
+          <label class="space-y-1"><span class="text-slate-400" data-i18n="profile"></span>
+            <select id="profile" class="w-full bg-slate-800 rounded px-2 py-2">
+              <option value="gentle" data-i18n="pGentle"></option>
+              <option value="normal" selected data-i18n="pNormal"></option>
+              <option value="fast" data-i18n="pFast"></option>
+            </select></label>
+          <label class="space-y-1"><span class="text-slate-400" data-i18n="repeat"></span>
+            <select id="repeat" class="w-full bg-slate-800 rounded px-2 py-2">
+              <option value="0" data-i18n="rNone"></option>
+              <option value="6">6 h</option><option value="24">24 h</option><option value="168">7 d</option>
+            </select></label>
+          <label class="space-y-1"><span class="text-slate-400" data-i18n="scope"></span>
+            <input id="scope" placeholder="example.com, api.example.com"
+                   class="w-full bg-slate-800 rounded px-2 py-2"></label>
+          <label class="space-y-1"><span class="text-slate-400" data-i18n="winStart"></span>
+            <input id="winStart" type="datetime-local" class="w-full bg-slate-800 rounded px-2 py-2"></label>
+          <label class="space-y-1"><span class="text-slate-400" data-i18n="winEnd"></span>
+            <input id="winEnd" type="datetime-local" class="w-full bg-slate-800 rounded px-2 py-2"></label>
+          <div class="space-y-1 pt-5">
+            <label class="flex gap-2"><input id="cve" type="checkbox"><span data-i18n="cve"></span></label>
+            <label class="flex gap-2"><input id="notify" type="checkbox"><span data-i18n="notify"></span></label>
+          </div>
+        </div>
+
+        <details open class="bg-slate-950/60 border border-slate-800 rounded-lg p-3">
+          <summary class="cursor-pointer flex items-center justify-between flex-wrap gap-2 text-sm font-semibold text-sky-400">
+            <span>🧩 <span data-i18n="modulesTitle"></span> <span id="modCount" class="text-xs text-slate-400 font-normal ml-1"></span></span>
+            <span class="flex gap-1.5 text-xs font-normal" onclick="event.stopPropagation()">
+              <button id="modAll" type="button" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200" data-i18n="modAll"></button>
+              <button id="modPassive" type="button" class="px-2 py-0.5 rounded bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300" data-i18n="modPassive"></button>
+              <button id="modActive" type="button" class="px-2 py-0.5 rounded bg-amber-900/60 hover:bg-amber-800 text-amber-300" data-i18n="modActive"></button>
+              <button id="modNone" type="button" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400" data-i18n="modNone"></button>
+            </span>
+          </summary>
+          <div id="moduleGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-3 text-xs"></div>
+        </details>
+
+        <label class="flex items-start gap-2 text-sm">
+          <input id="consent" type="checkbox" class="mt-1">
+          <span data-i18n="consent"></span>
+        </label>
+        <button id="start" class="bg-sky-600 hover:bg-sky-500 px-5 py-2 rounded font-semibold disabled:opacity-40" data-i18n="scanBtn"></button>
+        <p id="error" class="text-red-400 text-sm break-words"></p>
+        <details class="border-t border-slate-800 pt-2 text-xs text-slate-400">
+          <summary class="cursor-pointer text-sky-400 font-semibold" data-i18n="methodsTitle"></summary>
+          <pre id="methodSnippets" class="bg-black text-slate-300 p-3 rounded mt-2 overflow-auto whitespace-pre-wrap"></pre>
+        </details>
+      </section>
+
+      <section id="scanList" class="flex flex-wrap gap-2"></section>
+
+      <section id="progressBox" class="hidden space-y-2">
+        <div class="flex justify-between text-sm"><span id="statusText"></span><span id="pct">0%</span></div>
+        <div class="h-2 bg-slate-800 rounded"><div id="bar" class="h-2 bg-sky-500 rounded transition-all" style="width:0"></div></div>
+      </section>
+
+      <section class="bg-black rounded-xl border border-slate-800">
+        <div class="px-4 py-2 text-xs text-slate-500 border-b border-slate-800" data-i18n="liveLog"></div>
+        <pre id="log" class="p-4 text-xs text-green-400 h-56 overflow-auto whitespace-pre-wrap"></pre>
+      </section>
+
+      <section id="results" class="hidden space-y-4">
+        <div class="flex flex-wrap gap-4 items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="text-center"><div id="grade" class="text-5xl font-extrabold"></div><div id="score" class="text-xs text-slate-400"></div></div>
+            <div id="summary" class="flex gap-2 flex-wrap"></div>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center text-sm">
+            <input id="encPw" type="password" placeholder="🔒 Report password (opt.)" class="bg-slate-800 rounded px-2 py-1 text-xs w-40">
+            <a id="expJson" class="bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded" href="#">JSON</a>
+            <a id="expHtml" class="bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded" href="#">HTML</a>
+            <a id="expPdf" class="bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded" href="#">PDF</a>
+            <a id="expSarif" class="bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded" href="#">SARIF</a>
+            <a id="expBatch" class="hidden bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded" href="#" data-i18n="batch"></a>
+          </div>
+        </div>
+        <p id="tech" class="text-sm text-slate-400"></p>
+        <div id="owasp" class="text-sm"></div>
+        <div id="diff" class="text-sm"></div>
+        <div id="trendBox" class="hidden bg-slate-900 border border-slate-800 rounded-lg p-3">
+          <div class="text-xs text-slate-400 mb-1" data-i18n="trendTitle"></div>
+          <div id="trendSvg"></div>
+        </div>
+        <details id="cfgBox" class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+          <summary class="cursor-pointer font-semibold text-sky-400 text-sm" data-i18n="cfgTitle"></summary>
+          <div class="grid md:grid-cols-3 gap-3 mt-3 text-xs">
+            <div><b>nginx</b><pre id="cfgNginx" class="bg-black p-2 rounded mt-1 overflow-auto whitespace-pre-wrap"></pre></div>
+            <div><b>Apache</b><pre id="cfgApache" class="bg-black p-2 rounded mt-1 overflow-auto whitespace-pre-wrap"></pre></div>
+            <div><b>IIS (web.config)</b><pre id="cfgIis" class="bg-black p-2 rounded mt-1 overflow-auto whitespace-pre-wrap"></pre></div>
+          </div>
+        </details>
+        <div id="findings" class="space-y-3"></div>
+      </section>
+    </div>
+
+    <!-- ===== History tab ===== -->
+    <div id="viewHistory" class="hidden space-y-3">
+      <h2 class="text-xl font-semibold" data-i18n="tabHistory"></h2>
+      <div id="historyList" class="space-y-2 text-sm"></div>
+    </div>
+
+    <!-- ===== Inventory & Custom Rules tab ===== -->
+    <div id="viewInv" class="hidden space-y-6">
+      <div class="space-y-2">
+        <h2 class="text-xl font-semibold" data-i18n="invTitle"></h2>
+        <div id="invList" class="space-y-2 text-sm"></div>
+      </div>
+      <div class="space-y-2 bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <h3 class="text-lg font-semibold" data-i18n="rulesTitle"></h3>
+        <p class="text-xs text-slate-400" data-i18n="rulesHint"></p>
+        <textarea id="rulesYaml" rows="10" class="w-full bg-black text-emerald-300 font-mono text-xs p-3 rounded"></textarea>
+        <div class="flex items-center gap-3">
+          <button id="saveRules" class="bg-sky-600 hover:bg-sky-500 px-4 py-1.5 rounded text-sm font-semibold" data-i18n="triSave"></button>
+          <span id="rulesMsg" class="text-xs text-slate-400"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Schedules & Admin tab ===== -->
+    <div id="viewSched" class="hidden space-y-6">
+      <div class="space-y-2">
+        <h2 class="text-xl font-semibold" data-i18n="tabSched"></h2>
+        <p class="text-xs text-slate-500" data-i18n="schedHint"></p>
+        <div id="schedList" class="space-y-2 text-sm"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
+        <h3 class="text-lg font-semibold" data-i18n="authDocTitle"></h3>
+        <div class="grid sm:grid-cols-3 gap-2">
+          <input id="aoOwner" placeholder="Owner / Organization" class="bg-slate-800 rounded px-2 py-1.5">
+          <input id="aoContact" placeholder="Contact e-mail" class="bg-slate-800 rounded px-2 py-1.5">
+          <input id="aoScope" placeholder="example.com, sub.example.com" class="bg-slate-800 rounded px-2 py-1.5">
+        </div>
+        <button id="aoCreate" class="bg-sky-600 hover:bg-sky-500 px-3 py-1 rounded text-xs font-semibold" data-i18n="aoBtn"></button>
+        <div id="aoList" class="space-y-1 text-xs"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h3 class="text-lg font-semibold" data-i18n="adminTitle"></h3>
+          <button id="backupBtn" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs" data-i18n="backupBtn"></button>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <div class="font-semibold text-xs text-slate-400" data-i18n="usersLabel"></div>
+            <div class="flex gap-1">
+              <input id="uName" placeholder="username" class="bg-slate-800 rounded px-2 py-1 text-xs flex-1">
+              <input id="uPass" type="password" placeholder="password (8+)" class="bg-slate-800 rounded px-2 py-1 text-xs flex-1">
+              <select id="uRole" class="bg-slate-800 rounded px-2 py-1 text-xs">
+                <option value="analyst">analyst</option><option value="viewer">viewer</option><option value="admin">admin</option>
+              </select>
+              <button id="uAdd" class="bg-sky-600 px-2 py-1 rounded text-xs">+</button>
+            </div>
+            <div id="uList" class="text-xs space-y-1"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-xs text-slate-400" data-i18n="keysLabel"></div>
+            <div class="flex gap-1">
+              <input id="kName" placeholder="CI key name" class="bg-slate-800 rounded px-2 py-1 text-xs flex-1">
+              <select id="kRole" class="bg-slate-800 rounded px-2 py-1 text-xs">
+                <option value="analyst">analyst</option><option value="viewer">viewer</option><option value="admin">admin</option>
+              </select>
+              <button id="kAdd" class="bg-sky-600 px-2 py-1 rounded text-xs">+</button>
+            </div>
+            <pre id="kNew" class="hidden bg-black text-amber-300 p-2 rounded text-xs overflow-auto"></pre>
+            <div id="kList" class="text-xs space-y-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-lg font-semibold" data-i18n="auditTitle"></h3>
+        <div id="auditList" class="text-xs text-slate-400 space-y-1 mt-2"></div>
+      </div>
+    </div>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

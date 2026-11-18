@@ -1,0 +1,18 @@
+services:
+  vulnscanner:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"     # published on localhost only; put HTTPS in front to expose further
+    environment:
+      DASHBOARD_USER: ${DASHBOARD_USER:?set DASHBOARD_USER}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:?set DASHBOARD_PASSWORD}
+      # Optional notifications:
+      # TELEGRAM_BOT_TOKEN: ""
+      # TELEGRAM_CHAT_ID: ""
+      # WEBHOOK_URL: ""
+      # SMTP_HOST: ""  SMTP_PORT: "587"  SMTP_USER: ""  SMTP_PASSWORD: ""  SMTP_TO: ""
+      # NVD_API_KEY: ""
+    volumes:
+      - scanner-data:/srv/data
+volumes:
+  scanner-data:

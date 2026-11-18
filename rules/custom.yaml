@@ -1,0 +1,10 @@
+# Custom GET-only rules for VulnScanner.
+# Each rule requests <base><path> and raises a finding when conditions match.
+rules:
+  - id: custom-health-debug
+    title: Detailed health/debug endpoint exposed (/healthz)
+    severity: Low
+    path: /healthz
+    status: 200
+    match_regex: "(?i)(database|redis|version|memory|uptime)"
+    recommendation: "Return only a minimal OK status publicly; require auth for detailed diagnostics."

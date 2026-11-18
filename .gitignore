@@ -1,0 +1,35 @@
+# Virtual environments & Python cache
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime database, signing keys & backups (never commit local scan data)
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/signing.key
+data/backups/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Generated reports
+*.sarif
+*.sarif.json
+*.enc
+report-*
+batch-report.*
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
